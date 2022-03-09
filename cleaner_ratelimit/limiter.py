@@ -6,22 +6,10 @@ from .limit import LimitType, Limit, parse_limits, parse_limit
 
 KeyFunc = typing.Callable[[Request], str]
 
-# mypy#708
-T = typing.TypeVar("T")
-
-
-class FunctionProperty(typing.Generic[T]):
-    def __get__(self, oself: typing.Any, owner: typing.Any) -> T:
-        ...
-
-    def __set__(self, oself: typing.Any, value: T) -> None:
-        ...
-
 
 class Limiter:
     global_limits: typing.List[Limit]
     route_limits: typing.Dict[str, typing.List[Limit]]
-    key_func: FunctionProperty[KeyFunc]  # mypy#708
 
     def __init__(
         self,
