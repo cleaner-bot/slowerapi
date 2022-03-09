@@ -16,6 +16,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Setup python
         uses: actions/setup-python@v3
         with:
@@ -33,6 +37,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Setup python
         uses: actions/setup-python@v3
         with:
@@ -49,6 +57,10 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Setup python
         uses: actions/setup-python@v3
