@@ -1,1 +1,2 @@
 fastapi>=0.74,<0.75
+git+https://github.com/cleaner-bot/expirepy.git#egg=expirepy
