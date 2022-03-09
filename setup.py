@@ -15,7 +15,7 @@ setup(
     author="Leo Developer",
     author_email="git@leodev.xyz",
     description="ratelimit library for fastapi",
-    requires=parse_requirements_file("requirements.txt"),
+    install_requires=parse_requirements_file("requirements.txt"),
     packages=find_namespace_packages(include=["cleaner_ratelimit*"]),
     package_data={"cleaner_ratelimit": ["py.typed"]},
 )
