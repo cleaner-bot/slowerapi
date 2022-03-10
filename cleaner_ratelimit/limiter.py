@@ -2,6 +2,7 @@ import typing
 
 from fastapi import Request
 
+from .jail import Jail
 from .limit import LimitType, Limit, parse_limits, parse_limit
 
 KeyFunc = typing.Callable[[Request], str]
@@ -10,6 +11,7 @@ KeyFunc = typing.Callable[[Request], str]
 class Limiter:
     global_limits: typing.List[Limit]
     route_limits: typing.Dict[str, typing.List[Limit]]
+    jail: typing.Optional[Jail] = None
 
     def __init__(
         self,

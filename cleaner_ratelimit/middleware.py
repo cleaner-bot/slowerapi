@@ -30,13 +30,23 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         if limiter is None or not limiter.enabled:
             return await call_next(request)
 
+        if limiter.jail is not None and limiter.jail.is_jailed(request):
+            return self._make_jailed_response()
+
         ratelimited = None
         key = limiter.key_func(request)
 
         if limiter.global_limits:
             ratelimited = self._check_bucket("global", key, limiter.global_limits)
             if ratelimited is not None and ratelimited.limited:
-                return self._make_response(ratelimited)
+                if limiter.jail is not None:
+                    jailed = self._check_bucket("jailed", key, [limiter.jail.limit])
+                    if jailed is not None and jailed.limited:
+                        coro = limiter.jail.jail(request)
+                        if coro is not None:
+                            await coro
+                        return self._make_jailed_response()
+                return self._make_ratelimited_response(ratelimited)
 
         handler = None
         for route in app.routes:
@@ -50,7 +60,14 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
             if route_limits:
                 ratelimited = self._check_bucket(route_name, key, route_limits)
                 if ratelimited is not None and ratelimited.limited:
-                    return self._make_response(ratelimited)
+                    if limiter.jail is not None:
+                        jailed = self._check_bucket("jailed", key, [limiter.jail.limit])
+                        if jailed is not None and jailed.limited:
+                            coro = limiter.jail.jail(request)
+                            if coro is not None:
+                                await coro
+                            return self._make_jailed_response()
+                    return self._make_ratelimited_response(ratelimited)
 
         response = await call_next(request)
         if ratelimited:
@@ -72,7 +89,18 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
                 ratelimit = ratelimited
         return ratelimit
 
-    def _make_response(self, ratelimit: Ratelimited) -> Response:
+    def _make_jailed_response(self) -> Response:
+        return JSONResponse(
+            {
+                "detail": (
+                    "Banned from the API for exceeding allowed limits. "
+                    "Contact system administrators."
+                ),
+            },
+            status_code=429,
+        )
+
+    def _make_ratelimited_response(self, ratelimit: Ratelimited) -> Response:
         response = JSONResponse(
             {
                 "detail": (
