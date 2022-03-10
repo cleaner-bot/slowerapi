@@ -27,7 +27,7 @@ class Limiter:
     def add_global_limit(self, limit: LimitType):
         self.global_limits.append(parse_limit(limit))
 
-    def limit(self, *limits: typing.List[LimitType]):
+    def limit(self, *limits: LimitType):
         def wrapper(func):
             name = f"{func.__module__}.{func.__name__}"
             self.route_limits[name] = parse_limits(limits)
