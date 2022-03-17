@@ -51,7 +51,7 @@ class CloudflareIPAccessRuleReporter:
     def __init__(
         self,
         x_auth_email: str,
-        x_auth_token: str,
+        x_auth_key: str,
         zone_id: str | None = None,
         note: str = None,
     ) -> None:
@@ -59,7 +59,7 @@ class CloudflareIPAccessRuleReporter:
         self.note = note
         self.aclient = httpx.AsyncClient(
             base_url="https://api.cloudflare.com/client/v4/",
-            headers={"x-auth-email": x_auth_email, "x-auth-token": x_auth_token},
+            headers={"x-auth-email": x_auth_email, "x-auth-key": x_auth_key},
         )
 
     async def __call__(self, request: Request, ip_range: str):
@@ -69,7 +69,7 @@ class CloudflareIPAccessRuleReporter:
         note = self.note
         if note is None:
             note = "Automatic jail."
-        await self.aclient.post(
+        req = await self.aclient.post(
             endpoint,
             json={
                 "mode": "block",
@@ -80,3 +80,4 @@ class CloudflareIPAccessRuleReporter:
                 },
             },
         )
+        req.raise_for_status()

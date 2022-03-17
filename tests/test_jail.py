@@ -43,7 +43,7 @@ async def test_cloudflare_ip_access_rule_reporter():
     cfiparr = CloudflareIPAccessRuleReporter("test@test.cf", "0123456789")
 
     assert cfiparr.aclient.headers["x-auth-email"] == "test@test.cf"
-    assert cfiparr.aclient.headers["x-auth-token"] == "0123456789"
+    assert cfiparr.aclient.headers["x-auth-key"] == "0123456789"
 
     cfiparr.aclient.post = post = mock.AsyncMock()
 
