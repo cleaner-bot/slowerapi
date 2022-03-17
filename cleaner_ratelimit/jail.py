@@ -27,7 +27,7 @@ class Jail:
         self,
         ip_func: IpFunc,
         limit: LimitType,
-        reporter: typing.Optional[ReportFunc] = None,
+        reporter: ReportFunc | None = None,
     ):
         self.ip_func = ip_func
         self.limit = parse_limit(limit)
@@ -52,7 +52,7 @@ class CloudflareIPAccessRuleReporter:
         self,
         x_auth_email: str,
         x_auth_token: str,
-        zone_id: typing.Optional[str] = None,
+        zone_id: str | None = None,
         note: str = None,
     ) -> None:
         self.zone_id = zone_id

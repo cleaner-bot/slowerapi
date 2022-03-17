@@ -1,5 +1,4 @@
 from datetime import datetime
-import typing
 
 from starlette.applications import Starlette
 from starlette.middleware.base import (
@@ -16,7 +15,7 @@ from .strategy import Ratelimited, Strategy, MovingWindowStrategy
 
 
 class RatelimitMiddleware(BaseHTTPMiddleware):
-    buckets: typing.Dict[str, Strategy]
+    buckets: dict[str, Strategy]
 
     def __init__(self, app, dispatch=None) -> None:
         super().__init__(app, dispatch)
@@ -26,7 +25,7 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         app: Starlette = request.app
-        limiter: typing.Optional[Limiter] = getattr(app.state, "limiter", None)
+        limiter: Limiter | None = getattr(app.state, "limiter", None)
         if limiter is None or not limiter.enabled:
             return await call_next(request)
 
@@ -75,8 +74,8 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         return response
 
     def _check_bucket(
-        self, bucket: str, key: str, limits: typing.List[Limit]
-    ) -> typing.Optional[Ratelimited]:
+        self, bucket: str, key: str, limits: list[Limit]
+    ) -> Ratelimited | None:
         ratelimit = None
         for limit in limits:
             limit_bucket = f"{bucket}:{limit.requests}/{limit.window}"

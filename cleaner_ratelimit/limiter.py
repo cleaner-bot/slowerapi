@@ -9,14 +9,14 @@ KeyFunc = typing.Callable[[Request], str]
 
 
 class Limiter:
-    global_limits: typing.List[Limit]
-    route_limits: typing.Dict[str, typing.List[Limit]]
-    jail: typing.Optional[Jail] = None
+    global_limits: list[Limit]
+    route_limits: dict[str, list[Limit]]
+    jail: Jail | None = None
 
     def __init__(
         self,
         key_func: KeyFunc,
-        global_limits: typing.List[LimitType],
+        global_limits: list[LimitType],
         enabled: bool = True,
     ) -> None:
         self.key_func = key_func

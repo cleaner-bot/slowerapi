@@ -22,10 +22,10 @@ class Limit(typing.NamedTuple):
     window: int  # in seconds
 
 
-LimitType = typing.Union[str, Limit]
+LimitType = str | Limit
 
 
-def parse_limits(limits: typing.List[LimitType]) -> typing.List[Limit]:
+def parse_limits(limits: list[LimitType]) -> list[Limit]:
     return [parse_limit(x) for x in limits]
 
 
