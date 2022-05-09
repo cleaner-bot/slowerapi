@@ -1,5 +1,6 @@
 import pytest
-from cleaner_ratelimit.limit import parse_limit, parse_limits, Limit
+
+from cleaner_ratelimit.limit import Limit, parse_limit, parse_limits
 
 
 def test_parse_limit():

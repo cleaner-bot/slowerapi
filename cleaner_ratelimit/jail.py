@@ -1,11 +1,10 @@
-import typing
 import ipaddress
+import typing
 
-from fastapi import Request
 import httpx
+from fastapi import Request
 
-from .limit import parse_limit, LimitType
-
+from .limit import LimitType, parse_limit
 
 IpFunc = typing.Callable[[Request], str]
 ReportFunc = typing.Callable[[Request, str], typing.Any]

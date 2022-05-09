@@ -1,6 +1,5 @@
 import typing
 
-
 time_units = {
     "s": 1,
     "second": 1,

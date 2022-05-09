@@ -3,7 +3,7 @@ import typing
 from fastapi import Request
 
 from .jail import Jail
-from .limit import LimitType, Limit, parse_limits, parse_limit
+from .limit import Limit, LimitType, parse_limit, parse_limits
 
 KeyFunc = typing.Callable[[Request], str]
 

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from cleaner_ratelimit import Jail
-from cleaner_ratelimit.jail import reduce_ip_range, CloudflareIPAccessRuleReporter
+from cleaner_ratelimit.jail import CloudflareIPAccessRuleReporter, reduce_ip_range
 
 
 def test_reduce_ip_range():

@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from starlette.routing import Match
 
-from cleaner_ratelimit import RatelimitMiddleware, Limiter, Jail
+from cleaner_ratelimit import Jail, Limiter, RatelimitMiddleware
 from cleaner_ratelimit.limit import parse_limit
 
 

@@ -1,17 +1,14 @@
 from datetime import datetime
 
 from starlette.applications import Starlette
-from starlette.middleware.base import (
-    BaseHTTPMiddleware,
-    RequestResponseEndpoint,
-)
-from starlette.responses import Response, JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
 from starlette.routing import Match
 
 from .limit import Limit
 from .limiter import Limiter
-from .strategy import Ratelimited, Strategy, MovingWindowStrategy
+from .strategy import MovingWindowStrategy, Ratelimited, Strategy
 
 
 class RatelimitMiddleware(BaseHTTPMiddleware):
