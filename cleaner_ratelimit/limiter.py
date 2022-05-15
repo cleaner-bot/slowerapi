@@ -16,11 +16,11 @@ class Limiter:
     def __init__(
         self,
         key_func: KeyFunc,
-        global_limits: list[LimitType],
+        global_limits: list[LimitType] = None,
         enabled: bool = True,
     ) -> None:
         self.key_func = key_func
-        self.global_limits = parse_limits(global_limits)
+        self.global_limits = parse_limits(global_limits) if global_limits else []
         self.route_limits = {}
         self.enabled = enabled
 
