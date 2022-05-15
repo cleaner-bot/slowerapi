@@ -4,7 +4,7 @@ import pytest
 
 from slowerapi import IPJail
 from slowerapi.jail import reduce_ip_range
-from slowerapi.jails.cf import CloudflareIPAccessRuleReporter
+from slowerapi.reporters.cf import CloudflareIPAccessRuleReporter
 
 
 def test_reduce_ip_range():
