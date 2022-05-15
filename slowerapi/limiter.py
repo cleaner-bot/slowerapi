@@ -18,7 +18,7 @@ class Limiter:
     def __init__(
         self,
         key_func: KeyFunc,
-        global_limits: list[LimitType] = None,
+        global_limits: typing.Sequence[LimitType] | None = None,
         jail: Jail | None = None,
         strategy: typing.Type[Strategy] = MovingWindowStrategy,
         enabled: bool = True,

@@ -44,7 +44,7 @@ class IPJail(Jail):
     def __init__(
         self,
         ip_func: IpFunc,
-        limits: list[LimitType],
+        limits: typing.Sequence[LimitType],
         reporters: list[ReportFunc] | None = None,
     ):
         self.ip_func = ip_func
