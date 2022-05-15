@@ -1,5 +1,5 @@
-from cleaner_ratelimit.limit import Limit
-from cleaner_ratelimit.strategy import MovingWindowStrategy
+from slowerapi.limit import Limit
+from slowerapi.strategy import MovingWindowStrategy
 
 
 def test_moving_window():

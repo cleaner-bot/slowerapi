@@ -3,8 +3,8 @@ from unittest import mock
 import pytest
 from starlette.routing import Match
 
-from cleaner_ratelimit import IPJail, Limiter, RatelimitMiddleware
-from cleaner_ratelimit.limit import parse_limit
+from slowerapi import IPJail, Limiter, RatelimitMiddleware
+from slowerapi.limit import parse_limit
 
 
 @pytest.fixture()
@@ -182,7 +182,7 @@ async def test_route_limit_jailed(middleware: RatelimitMiddleware, with_reporter
     key_func = mock.Mock(return_value="key")
     request.app.state.limiter = limiter = Limiter(key_func, ())  # type: ignore
     reporter = [mock.AsyncMock()] if with_reporter else None
-    limiter.jail = IPJail(lambda _: "1.2.3.4", ["0/1s"], reporter)
+    limiter.jail = IPJail(lambda _: "1.2.3.4", ["0/1s"], reporter)  # type: ignore
     route = mock.Mock()
     route.matches = mock.Mock(return_value=(Match.FULL, 0))  # type: ignore
     name = "cleaner_ratelimit_test.test.test_route"

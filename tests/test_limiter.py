@@ -1,5 +1,5 @@
-from cleaner_ratelimit import Limiter
-from cleaner_ratelimit.limit import Limit
+from slowerapi import Limiter
+from slowerapi.limit import Limit
 
 
 def test_limiter():

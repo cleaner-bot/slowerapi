@@ -1,6 +1,6 @@
 from unittest import mock
 
-from cleaner_ratelimit import get_visitor_ip
+from slowerapi import get_visitor_ip
 
 
 def test_get_visitor_ip():
