@@ -31,7 +31,7 @@ def test_multiple_limiter():
         pass  # pragma: no cover
 
     @limiter.limit("1/1")
-    def test():
+    def test():  # noqa: F811
         pass  # pragma: no cover
 
     name = f"{test.__module__}.{test.__name__}"
