@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 import ipaddress
 import typing
+from abc import ABC
 
-import httpx
 from fastapi import Request
 
-from .limit import LimitType, parse_limit
+from .limit import LimitType, parse_limits
+
+if typing.TYPE_CHECKING:
+    from .limiter import Limiter
+
 
 IpFunc = typing.Callable[[Request], str]
 ReportFunc = typing.Callable[[Request, str], typing.Any]
@@ -19,64 +25,43 @@ def reduce_ip_range(ip: str) -> str:
         return f"{addr.packed[:8].hex(':', 2)}::/64"
 
 
-class Jail:
+class Jail(ABC):
+    def is_jailed(self, request: Request) -> bool:
+        ...
+
+    def should_jail(self, request: Request, key: str, limiter: Limiter) -> bool:
+        ...
+
+    async def jail(self, request: Request):
+        ...
+
+
+class IPJail(Jail):
     _jailed: set[str]
 
     def __init__(
         self,
         ip_func: IpFunc,
-        limit: LimitType,
-        reporter: ReportFunc | None = None,
+        limits: list[LimitType],
+        reporters: list[ReportFunc] | None = None,
     ):
         self.ip_func = ip_func
-        self.limit = parse_limit(limit)
-        self.reporter = reporter
+        self.limits = parse_limits(limits)
+        self.reporters = reporters if reporters else []
         self._jailed = set()
 
     def is_jailed(self, request: Request) -> bool:
         ip_range = reduce_ip_range(self.ip_func(request))
         return ip_range in self._jailed
 
-    def jail(self, request: Request):
+    def should_jail(self, request: Request, key: str, limiter: Limiter) -> bool:
+        ratelimited = limiter.check_bucket("jailed", key, self.limits)
+        return ratelimited is not None and ratelimited.limited
+
+    async def jail(self, request: Request):
         ip_range = reduce_ip_range(self.ip_func(request))
         if ip_range in self._jailed:
             return
         self._jailed.add(ip_range)
-        if self.reporter is not None:
-            return self.reporter(request, ip_range)
-
-
-class CloudflareIPAccessRuleReporter:
-    def __init__(
-        self,
-        x_auth_email: str,
-        x_auth_key: str,
-        zone_id: str | None = None,
-        note: str = None,
-    ) -> None:
-        self.zone_id = zone_id
-        self.note = note
-        self.aclient = httpx.AsyncClient(
-            base_url="https://api.cloudflare.com/client/v4/",
-            headers={"x-auth-email": x_auth_email, "x-auth-key": x_auth_key},
-        )
-
-    async def __call__(self, request: Request, ip_range: str):
-        endpoint = "user/firewall/access_rules/rules"
-        if self.zone_id is not None:
-            endpoint = f"zones/{self.zone_id}/firewall/access_rules/rules"
-        note = self.note
-        if note is None:
-            note = "Automatic jail."
-        req = await self.aclient.post(
-            endpoint,
-            json={
-                "mode": "block",
-                "configuration": {
-                    "target": "ip_range",
-                    "value": ip_range,
-                    "note": note,
-                },
-            },
-        )
-        req.raise_for_status()
+        for reporter in self.reporters:
+            await reporter(request, ip_range)

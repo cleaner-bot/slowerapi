@@ -21,6 +21,8 @@ class Strategy:
 
 
 class MovingWindowStrategy(Strategy):
+    _requests: ExpiringDict[str, int]
+
     def __init__(self, limit: Limit) -> None:
         super().__init__(limit)
         self._requests = ExpiringDict(expires=limit.window)

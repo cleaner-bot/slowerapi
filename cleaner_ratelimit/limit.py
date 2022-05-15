@@ -24,7 +24,7 @@ class Limit(typing.NamedTuple):
 LimitType = str | Limit
 
 
-def parse_limits(limits: list[LimitType]) -> list[Limit]:
+def parse_limits(limits: typing.Sequence[LimitType]) -> list[Limit]:
     return [parse_limit(x) for x in limits]
 
 

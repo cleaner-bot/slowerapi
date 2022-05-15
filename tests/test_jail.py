@@ -2,8 +2,9 @@ from unittest import mock
 
 import pytest
 
-from cleaner_ratelimit import Jail
-from cleaner_ratelimit.jail import CloudflareIPAccessRuleReporter, reduce_ip_range
+from cleaner_ratelimit import IPJail
+from cleaner_ratelimit.jail import reduce_ip_range
+from cleaner_ratelimit.jails.cf import CloudflareIPAccessRuleReporter
 
 
 def test_reduce_ip_range():
@@ -13,29 +14,31 @@ def test_reduce_ip_range():
 
 
 def test_jail_limit():
-    jail = Jail(str, "50/1m")
-    assert jail.limit.requests == 50
-    assert jail.limit.window == 60
+    jail = IPJail(str, ["50/1m"])
+    assert jail.limits[0].requests == 50
+    assert jail.limits[0].window == 60
 
 
-def test_is_jailed():
-    jail = Jail(str, "")
+@pytest.mark.asyncio
+async def test_is_jailed():
+    jail = IPJail(str, [])
     assert not jail.is_jailed("1.2.3.0")
     assert not jail.is_jailed("1.2.3.4")
-    jail.jail("1.2.3.4")
+    await jail.jail("1.2.3.4")
     assert jail.is_jailed("1.2.3.4")
     assert jail.is_jailed("1.2.3.0")
 
 
-def test_reporter():
-    reporter = mock.Mock()
+@pytest.mark.asyncio
+async def test_reporter():
+    reporter = mock.AsyncMock()
     args = ("1.2.3.4", "1.2.3.0/24")
-    jail = Jail(str, "", reporter)
+    jail = IPJail(str, "", [reporter])
 
-    jail.jail("1.2.3.4")
-    reporter.assert_called_once_with(*args)
-    jail.jail("1.2.3.4")
-    reporter.assert_called_once_with(*args)  # not called again
+    await jail.jail("1.2.3.4")
+    reporter.assert_awaited_once_with(*args)
+    await jail.jail("1.2.3.4")
+    reporter.assert_awaited_once_with(*args)  # not called again
 
 
 @pytest.mark.asyncio
