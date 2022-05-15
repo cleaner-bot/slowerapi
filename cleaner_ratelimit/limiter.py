@@ -24,8 +24,9 @@ class Limiter:
         self.route_limits = {}
         self.enabled = enabled
 
-    def add_global_limit(self, limit: LimitType):
-        self.global_limits.append(parse_limit(limit))
+    def add_global_limit(self, limit: LimitType, *limits: LimitType):
+        limits = parse_limits((limit, *limits))
+        self.global_limits.extend(limits)
 
     def limit(self, limit: LimitType, *limits: LimitType):
         limits = parse_limits((limit, *limits))
