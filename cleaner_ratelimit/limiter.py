@@ -27,10 +27,18 @@ class Limiter:
     def add_global_limit(self, limit: LimitType):
         self.global_limits.append(parse_limit(limit))
 
-    def limit(self, *limits: LimitType):
+    def limit(self, limit: LimitType, *limits: LimitType):
+        limits = parse_limits((limit, *limits))
+
         def wrapper(func):
             name = f"{func.__module__}.{func.__name__}"
-            self.route_limits[name] = parse_limits(limits)
+            
+            current_limits = self.route_limits.get(name, None)
+            if current_limits is None:
+                self.route_limits[name] = limits
+            else:
+                current_limits.extend(limits)
+            
             return func
 
         return wrapper
