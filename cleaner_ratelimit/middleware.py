@@ -6,17 +6,13 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Match
 
-from .limit import Limit
 from .limiter import Limiter
-from .strategy import MovingWindowStrategy, Ratelimited, Strategy
+from .strategy import MovingWindowStrategy, Ratelimited
 
 
 class RatelimitMiddleware(BaseHTTPMiddleware):
-    buckets: dict[str, Strategy]
-
     def __init__(self, app, dispatch=None) -> None:
         super().__init__(app, dispatch)
-        self.buckets = {}
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
@@ -33,10 +29,10 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         key = limiter.key_func(request)
 
         if limiter.global_limits:
-            ratelimited = self._check_bucket("global", key, limiter.global_limits)
+            ratelimited = limiter.check_bucket("global", key, limiter.global_limits, MovingWindowStrategy)
             if ratelimited is not None and ratelimited.limited:
                 if limiter.jail is not None:
-                    jailed = self._check_bucket("jailed", key, [limiter.jail.limit])
+                    jailed = limiter.check_bucket("jailed", key, [limiter.jail.limit], MovingWindowStrategy)
                     if jailed is not None and jailed.limited:
                         coro = limiter.jail.jail(request)
                         if coro is not None:
@@ -54,10 +50,10 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
             route_name = f"{handler.__module__}.{handler.__name__}"
             route_limits = limiter.route_limits.get(route_name, None)
             if route_limits:
-                ratelimited = self._check_bucket(route_name, key, route_limits)
+                ratelimited = limiter.check_bucket(route_name, key, route_limits, MovingWindowStrategy)
                 if ratelimited is not None and ratelimited.limited:
                     if limiter.jail is not None:
-                        jailed = self._check_bucket("jailed", key, [limiter.jail.limit])
+                        jailed = limiter.check_bucket("jailed", key, [limiter.jail.limit], MovingWindowStrategy)
                         if jailed is not None and jailed.limited:
                             coro = limiter.jail.jail(request)
                             if coro is not None:
@@ -69,21 +65,6 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         if ratelimited:
             self._add_headers(response, ratelimited)
         return response
-
-    def _check_bucket(
-        self, bucket: str, key: str, limits: list[Limit]
-    ) -> Ratelimited | None:
-        ratelimit = None
-        for limit in limits:
-            limit_bucket = f"{bucket}:{limit.requests}/{limit.window}"
-            b = self.buckets.get(limit_bucket, None)
-            if b is None:
-                self.buckets[limit_bucket] = b = MovingWindowStrategy(limit)
-
-            ratelimited = b.limit(key)
-            if ratelimited.limited or ratelimit is None:
-                ratelimit = ratelimited
-        return ratelimit
 
     def _make_jailed_response(self) -> Response:
         return JSONResponse(
