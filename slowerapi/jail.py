@@ -8,7 +8,7 @@ from fastapi import Request
 
 from .limit import LimitType, parse_limits
 
-if typing.TYPE_CHECKING:
+if typing.TYPE_CHECKING:  # pragma: no cover
     from .limiter import Limiter
 
 
@@ -26,13 +26,15 @@ def reduce_ip_range(ip: str) -> str:
 
 
 class Jail(ABC):
-    def is_jailed(self, request: Request) -> bool:
+    def is_jailed(self, request: Request) -> bool:  # pragma: no cover
         ...
 
-    def should_jail(self, request: Request, key: str, limiter: Limiter) -> bool:
+    def should_jail(
+        self, request: Request, key: str, limiter: Limiter
+    ) -> bool:  # pragma: no cover
         ...
 
-    async def jail(self, request: Request):
+    async def jail(self, request: Request):  # pragma: no cover
         ...
 
 
