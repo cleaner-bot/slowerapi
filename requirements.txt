@@ -1,2 +1,2 @@
-fastapi>=0.74,<0.78
+fastapi>=0.74,<0.79
 expirepy@git+https://github.com/cleaner-bot/expirepy.git
