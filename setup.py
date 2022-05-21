@@ -4,7 +4,7 @@ from setuptools import find_namespace_packages, setup  # type: ignore
 
 setup(
     name="slowerapi",
-    version="0.2.0",
+    version="0.2.1",
     url="https://github.com/cleaner-bot/slowerapi",
     author="Leo Developer",
     author_email="git@leodev.xyz",
