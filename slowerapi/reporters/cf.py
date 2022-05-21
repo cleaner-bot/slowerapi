@@ -5,8 +5,8 @@ from fastapi import Request
 class CloudflareIPAccessRuleReporter:
     def __init__(
         self,
-        x_auth_email: str,
-        x_auth_key: str,
+        email_or_token: str,
+        key: str | None = None,
         zone_id: str | None = None,
         note: str = None,
     ) -> None:
@@ -14,7 +14,11 @@ class CloudflareIPAccessRuleReporter:
         self.note = note
         self.aclient = httpx.AsyncClient(
             base_url="https://api.cloudflare.com/client/v4/",
-            headers={"x-auth-email": x_auth_email, "x-auth-key": x_auth_key},
+            headers=(
+                {"x-auth-email": email_or_token, "x-auth-key": key}
+                if key is not None
+                else {"Authorization": f"Bearer {email_or_token}"}
+            ),
         )
 
     async def __call__(self, request: Request, ip_range: str):
