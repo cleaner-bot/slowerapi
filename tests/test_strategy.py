@@ -10,32 +10,36 @@ def test_moving_window():
         window._requests.time_func = th.time_func
         window._requests.time_scale = th.scale
 
-        rt = window.limit("user_1")
+        rt = window.limit("user_1", True)
         assert rt.limited is False
         assert rt.limit == limit_5_10
         assert rt.remaining == 4
         assert rt.reset_after == 10
 
-        window.limit("user_1")
-        window.limit("user_1")
-        window.limit("user_1")
+        window.limit("user_1", True)
+        window.limit("user_1", True)
+        window.limit("user_1", True)
 
-        rt = window.limit("user_1")
+        rt = window.limit("user_1", True)
         assert rt.limited is False
         assert rt.remaining == 0
 
-        rt = window.limit("user_1")
+        rt = window.limit("user_1", False)
+        assert rt.limited is False
+        assert rt.remaining == 0
+
+        rt = window.limit("user_1", True)
         assert rt.limited is True
         assert rt.remaining == 0
 
-        rt = window.limit("user_2")
+        rt = window.limit("user_2", True)
         assert rt.limited is False
         assert rt.remaining == 4
         assert rt.reset_after == 10
 
         th.advance(10)
 
-        rt = window.limit("user_1")
+        rt = window.limit("user_1", True)
         assert rt.limited is False
         assert rt.limit == limit_5_10
         assert rt.remaining == 4

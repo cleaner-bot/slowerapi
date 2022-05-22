@@ -57,7 +57,7 @@ class IPJail(Jail):
         return ip_range in self._jailed
 
     def should_jail(self, request: Request, key: str, limiter: Limiter) -> bool:
-        ratelimited = limiter.check_bucket("jailed", key, self.limits)
+        ratelimited = limiter.check_bucket("jailed", key, self.limits, True)
         return ratelimited is not None and ratelimited.limited
 
     async def jail(self, request: Request):

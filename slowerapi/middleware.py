@@ -25,9 +25,13 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         ratelimited = None
         key = limiter.key_func(request)
 
+        all_requests = (
+            not limiter.global_only_count_failed and not limiter.route_only_count_failed
+        )
+
         if limiter.global_limits:
             response, ratelimited = await self._is_ratelimited(
-                limiter, request, "global", key, limiter.global_limits
+                limiter, request, "global", key, limiter.global_limits, all_requests
             )
             if response:
                 return response
@@ -38,17 +42,52 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
             if match == Match.FULL and hasattr(route, "endpoint"):
                 handler = route.endpoint  # type: ignore
 
+        route_name = route_limits = None
         if handler is not None:
             route_name = f"{handler.__module__}.{handler.__name__}"
             route_limits = limiter.route_limits.get(route_name, None)
-            if route_limits:
+            only_count_failed = (
+                limiter.global_only_count_failed
+                or route_name in limiter.route_only_count_failed
+            )
+            if not all_requests and not only_count_failed:
                 response, ratelimited = await self._is_ratelimited(
-                    limiter, request, route_name, key, route_limits
+                    limiter, request, "global", key, limiter.global_limits, True
                 )
                 if response:
                     return response
 
+            if route_limits:
+                response, ratelimited = await self._is_ratelimited(
+                    limiter,
+                    request,
+                    route_name,
+                    key,
+                    route_limits,
+                    not only_count_failed,
+                )
+                if response:
+                    return response
+
+        else:
+            only_count_failed = limiter.global_only_count_failed
+
         response = await call_next(request)
+
+        if only_count_failed and response.status_code >= 400:  # request failed
+            rt_response, ratelimited = await self._is_ratelimited(
+                limiter, request, "global", key, limiter.global_limits, True
+            )
+            if rt_response:
+                return rt_response
+
+            if handler is not None and route_name and route_limits:
+                rt_response, ratelimited = await self._is_ratelimited(
+                    limiter, request, route_name, key, route_limits, True
+                )
+                if rt_response:
+                    return rt_response
+
         if ratelimited:
             self._add_headers(response, ratelimited)
         return response
@@ -60,8 +99,9 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         bucket: str,
         key: str,
         limits: list[Limit],
+        increase: bool,
     ) -> tuple[Response | None, Ratelimited | None]:
-        ratelimited = limiter.check_bucket(bucket, key, limits)
+        ratelimited = limiter.check_bucket(bucket, key, limits, increase)
         if ratelimited is None or not ratelimited.limited:
             return None, ratelimited
 

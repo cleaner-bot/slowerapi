@@ -16,7 +16,7 @@ class Strategy:
     def __init__(self, limit: Limit) -> None:
         self._limit = limit
 
-    def limit(self, key: str) -> Ratelimited:
+    def limit(self, key: str, increase: bool) -> Ratelimited:
         raise NotImplementedError  # pragma: no cover
 
 
@@ -27,9 +27,13 @@ class MovingWindowStrategy(Strategy):
         super().__init__(limit)
         self._requests = ExpiringDict(expires=limit.window)
 
-    def limit(self, key: str) -> Ratelimited:
-        current = self._requests.get(key, 0) + 1
-        self._requests[key] = current
+    def limit(self, key: str, increase: bool) -> Ratelimited:
+        if increase:
+            current = self._requests.get(key, 0) + 1
+            self._requests[key] = current
+        else:
+            current = self._requests.get(key, 0)
+
         remaining = self._limit.requests - current
         return Ratelimited(
             limited=remaining < 0,

@@ -10,6 +10,7 @@ KeyFunc = typing.Callable[[Request], str]
 
 
 class Limiter:
+    route_only_count_failed: set[str]
     route_limits: dict[str, list[Limit]]
     global_limits: list[Limit]
     jail: Jail | None
@@ -22,9 +23,12 @@ class Limiter:
         jail: Jail | None = None,
         strategy: typing.Type[Strategy] = MovingWindowStrategy,
         enabled: bool = True,
+        only_count_failed: bool = False,
     ) -> None:
         self.key_func = key_func
         self.route_limits = {}
+        self.route_only_count_failed = set()
+        self.global_only_count_failed = only_count_failed
         self.global_limits = parse_limits(global_limits) if global_limits else []
         self.jail = jail
         self.strategy = strategy
@@ -32,7 +36,7 @@ class Limiter:
         self.buckets = {}
 
     def check_bucket(
-        self, bucket: str, key: str, limits: list[Limit]
+        self, bucket: str, key: str, limits: list[Limit], increase: bool
     ) -> Ratelimited | None:
         ratelimit = None
         for limit in limits:
@@ -41,7 +45,7 @@ class Limiter:
             if b is None:
                 self.buckets[limit_bucket] = b = self.strategy(limit)
 
-            ratelimited = b.limit(key)
+            ratelimited = b.limit(key, increase)
             # 1. first cycle, ratelimit is None
             # 2. this is limited and the current one isnt
             # 3. this one resets later
@@ -81,3 +85,8 @@ class Limiter:
             return func
 
         return wrapper
+
+    def only_count_failed(self, func):
+        name = f"{func.__module__}.{func.__name__}"
+        self.route_only_count_failed.add(name)
+        return func
