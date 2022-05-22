@@ -31,13 +31,18 @@ class MovingWindowStrategy(Strategy):
         if increase:
             current = self._requests.get(key, 0) + 1
             self._requests[key] = current
+            ttl = self._requests.ttl(key)
         else:
             current = self._requests.get(key, 0)
+            try:
+                ttl = self._requests.ttl(key)
+            except KeyError:
+                ttl = self._limit.window
 
         remaining = self._limit.requests - current
         return Ratelimited(
             limited=remaining < 0,
             limit=self._limit,
             remaining=max(0, remaining),
-            reset_after=self._requests.ttl(key),
+            reset_after=ttl,
         )
