@@ -102,7 +102,7 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         response.headers["X-Ratelimit-Limit"] = str(ratelimit.limit.requests)
         response.headers["X-Ratelimit-Remaining"] = str(ratelimit.remaining)
 
-        now_ms = int(datetime.utcnow().timestamp() * 1000)
+        now_ms = int(datetime.now().timestamp() * 1000)
         reset_after_ms = int(ratelimit.reset_after * 1000)
         response.headers["X-Ratelimit-Reset"] = str(now_ms + reset_after_ms)
 
