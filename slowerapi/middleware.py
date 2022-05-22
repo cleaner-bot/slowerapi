@@ -11,9 +11,6 @@ from .strategy import Ratelimited
 
 
 class RatelimitMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, dispatch=None) -> None:
-        super().__init__(app, dispatch)
-
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
