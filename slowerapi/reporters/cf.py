@@ -8,7 +8,7 @@ class CloudflareIPAccessRuleReporter:
         email_or_token: str,
         key: str | None = None,
         zone_id: str | None = None,
-        note: str = None,
+        note: str | None = None,
     ) -> None:
         self.zone_id = zone_id
         self.note = note
@@ -21,7 +21,7 @@ class CloudflareIPAccessRuleReporter:
             ),
         )
 
-    async def __call__(self, request: Request, ip_range: str):
+    async def __call__(self, request: Request, ip_range: str) -> None:
         endpoint = "user/firewall/access_rules/rules"
         if self.zone_id is not None:
             endpoint = f"zones/{self.zone_id}/firewall/access_rules/rules"

@@ -6,7 +6,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Match
 
-from .limiter import Limit, Limiter
+from .limit import Limit
+from .limiter import Limiter
 from .strategy import Ratelimited
 
 
@@ -15,7 +16,7 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         app: Starlette = request.app
-        limiter: Limiter | None = getattr(app.state, "limiter", None)
+        limiter: Limiter | None = getattr(app.state, "limiter", None)  # type: ignore
         if limiter is None or not limiter.enabled:
             return await call_next(request)
 
@@ -135,7 +136,7 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         self._add_headers(response, ratelimit)
         return response
 
-    def _add_headers(self, response: Response, ratelimit: Ratelimited):
+    def _add_headers(self, response: Response, ratelimit: Ratelimited) -> None:
         response.headers["X-Ratelimit-Limit"] = str(ratelimit.limit.requests)
         response.headers["X-Ratelimit-Remaining"] = str(ratelimit.remaining)
 

@@ -8,13 +8,13 @@ from slowerapi.limit import parse_limit
 
 
 @pytest.fixture()
-def middleware():
+def middleware() -> RatelimitMiddleware:
     app = mock.Mock()
     return RatelimitMiddleware(app)
 
 
 @pytest.mark.asyncio
-async def test_no_limiter(middleware: RatelimitMiddleware):
+async def test_no_limiter(middleware: RatelimitMiddleware) -> None:
     request = mock.Mock()
     request.app = middleware.app
     call_next = mock.AsyncMock()
@@ -26,7 +26,7 @@ async def test_no_limiter(middleware: RatelimitMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_disabled_limiter(middleware: RatelimitMiddleware):
+async def test_disabled_limiter(middleware: RatelimitMiddleware) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock()
@@ -40,7 +40,7 @@ async def test_disabled_limiter(middleware: RatelimitMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_is_jailed(middleware: RatelimitMiddleware):
+async def test_is_jailed(middleware: RatelimitMiddleware) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock()
@@ -57,7 +57,7 @@ async def test_is_jailed(middleware: RatelimitMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_key_func(middleware: RatelimitMiddleware):
+async def test_key_func(middleware: RatelimitMiddleware) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock()
@@ -72,7 +72,7 @@ async def test_key_func(middleware: RatelimitMiddleware):
 
 
 @pytest.mark.asyncio
-async def test_global_limit(middleware: RatelimitMiddleware):
+async def test_global_limit(middleware: RatelimitMiddleware) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock(return_value="key")
@@ -103,7 +103,7 @@ async def test_global_limit(middleware: RatelimitMiddleware):
 @pytest.mark.parametrize("with_reporter", (False, True))
 async def test_global_limit_jailed(
     middleware: RatelimitMiddleware, with_reporter: bool
-):
+) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock(return_value="key")
@@ -141,16 +141,16 @@ async def test_global_limit_jailed(
 
 
 @pytest.mark.asyncio
-async def test_route_limit(middleware: RatelimitMiddleware):
+async def test_route_limit(middleware: RatelimitMiddleware) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock(return_value="key")
     request.app.state.limiter = limiter = Limiter(key_func, ())  # type: ignore
     route = mock.Mock()
-    route.matches = mock.Mock(return_value=(Match.FULL, 0))  # type: ignore
+    route.matches = mock.Mock(return_value=(Match.FULL, 0))
     name = "cleaner_ratelimit_test.test.test_route"
-    route.endpoint.__module__ = "cleaner_ratelimit_test.test"  # type: ignore
-    route.endpoint.__name__ = "test_route"  # type: ignore
+    route.endpoint.__module__ = "cleaner_ratelimit_test.test"
+    route.endpoint.__name__ = "test_route"
     request.app.state.limiter.route_limits[name] = [parse_limit("1/1d")]  # type: ignore
     request.app.routes = [route]  # type: ignore
     call_next = mock.AsyncMock()
@@ -176,7 +176,7 @@ async def test_route_limit(middleware: RatelimitMiddleware):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("with_reporter", (False, True))
-async def test_route_limit_jailed(middleware: RatelimitMiddleware, with_reporter: bool):
+async def test_route_limit_jailed(middleware: RatelimitMiddleware, with_reporter: bool) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock(return_value="key")
@@ -184,10 +184,10 @@ async def test_route_limit_jailed(middleware: RatelimitMiddleware, with_reporter
     reporter = [mock.AsyncMock()] if with_reporter else None
     limiter.jail = IPJail(lambda _: "1.2.3.4", ["0/1s"], reporter)  # type: ignore
     route = mock.Mock()
-    route.matches = mock.Mock(return_value=(Match.FULL, 0))  # type: ignore
+    route.matches = mock.Mock(return_value=(Match.FULL, 0))
     name = "cleaner_ratelimit_test.test.test_route"
-    route.endpoint.__module__ = "cleaner_ratelimit_test.test"  # type: ignore
-    route.endpoint.__name__ = "test_route"  # type: ignore
+    route.endpoint.__module__ = "cleaner_ratelimit_test.test"
+    route.endpoint.__name__ = "test_route"
     request.app.state.limiter.route_limits[name] = [parse_limit("1/1d")]  # type: ignore
     request.app.routes = [route]  # type: ignore
     call_next = mock.AsyncMock()

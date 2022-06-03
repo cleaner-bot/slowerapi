@@ -34,7 +34,7 @@ class Jail(ABC):
     ) -> bool:  # pragma: no cover
         ...
 
-    async def jail(self, request: Request):  # pragma: no cover
+    async def jail(self, request: Request) -> None:  # pragma: no cover
         ...
 
 
@@ -60,7 +60,7 @@ class IPJail(Jail):
         ratelimited = limiter.check_bucket("jailed", key, self.limits, True)
         return ratelimited is not None and ratelimited.limited
 
-    async def jail(self, request: Request):
+    async def jail(self, request: Request) -> None:
         ip_range = reduce_ip_range(self.ip_func(request))
         if ip_range in self._jailed:
             return

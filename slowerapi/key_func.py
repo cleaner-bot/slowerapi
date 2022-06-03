@@ -1,8 +1,14 @@
 from fastapi import Request
 
+HEADERS = (
+    "cf-connecting-ip",
+)
+
 
 def get_visitor_ip(request: Request) -> str:
-    # cloudflare header
-    if ip := request.headers.get("cf-connecting-ip", None):
-        return ip
-    return request.client.host
+    for header in HEADERS:
+        if header in request.headers:
+            return request.headers[header]
+
+    # this is a string
+    return request.client.host  # type: ignore

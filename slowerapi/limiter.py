@@ -7,6 +7,10 @@ from .limit import Limit, LimitType, parse_limits
 from .strategy import MovingWindowStrategy, Ratelimited, Strategy
 
 KeyFunc = typing.Callable[[Request], str]
+P = typing.ParamSpec("P")
+R = typing.TypeVar("R")
+# I can't do this for some reason because mypy is stupid
+# DecoratedFunc = typing.Callable[P, R]
 
 
 class Limiter:
@@ -66,14 +70,14 @@ class Limiter:
                 ratelimit = ratelimited
         return ratelimit
 
-    def add_global_limit(self, limit: LimitType, *limits: LimitType):
+    def add_global_limit(self, limit: LimitType, *limits: LimitType) -> None:
         parsed_limits = parse_limits((limit, *limits))
         self.global_limits.extend(parsed_limits)
 
-    def limit(self, limit: LimitType, *limits: LimitType):
+    def limit(self, limit: LimitType, *limits: LimitType) -> typing.Callable[[typing.Callable[P, R]], typing.Callable[P, R]]:
         parsed_limits = parse_limits((limit, *limits))
 
-        def wrapper(func):
+        def wrapper(func: typing.Callable[P, R]) -> typing.Callable[P, R]:
             name = f"{func.__module__}.{func.__name__}"
 
             current_limits = self.route_limits.get(name, None)
@@ -86,7 +90,7 @@ class Limiter:
 
         return wrapper
 
-    def only_count_failed(self, func):
+    def only_count_failed(self, func: typing.Callable[P, R]) -> typing.Callable[P, R]:
         name = f"{func.__module__}.{func.__name__}"
         self.route_only_count_failed.add(name)
         return func

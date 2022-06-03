@@ -3,7 +3,7 @@ import pytest
 from slowerapi.limit import Limit, parse_limit, parse_limits
 
 
-def test_parse_limit():
+def test_parse_limit() -> None:
     limit_1_1 = Limit(1, 1)
     assert parse_limit("") == limit_1_1
     assert parse_limit("1") == limit_1_1
@@ -21,7 +21,7 @@ def test_parse_limit():
         parse_limit("1/something")
 
 
-def test_parse_limits():
+def test_parse_limits() -> None:
     limit_1_1 = Limit(1, 1)
     limits = ["", "1", "1/1"]
     assert parse_limits(limits) == [limit_1_1] * 3
