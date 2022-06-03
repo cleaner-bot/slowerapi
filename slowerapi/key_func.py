@@ -1,8 +1,6 @@
 from fastapi import Request
 
-HEADERS = (
-    "cf-connecting-ip",
-)
+HEADERS = ("cf-connecting-ip",)
 
 
 def get_visitor_ip(request: Request) -> str:

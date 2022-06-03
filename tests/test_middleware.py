@@ -176,7 +176,9 @@ async def test_route_limit(middleware: RatelimitMiddleware) -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("with_reporter", (False, True))
-async def test_route_limit_jailed(middleware: RatelimitMiddleware, with_reporter: bool) -> None:
+async def test_route_limit_jailed(
+    middleware: RatelimitMiddleware, with_reporter: bool
+) -> None:
     request = mock.Mock()
     request.app = middleware.app
     key_func = mock.Mock(return_value="key")

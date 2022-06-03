@@ -30,7 +30,7 @@ def test_multiple_limiter() -> None:
     def test() -> None:
         pass  # pragma: no cover
 
-    @limiter.limit("1/1")  # type: ignore 
+    @limiter.limit("1/1")  # type: ignore
     def test() -> None:  # noqa: F811
         pass  # pragma: no cover
 

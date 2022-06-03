@@ -74,7 +74,9 @@ class Limiter:
         parsed_limits = parse_limits((limit, *limits))
         self.global_limits.extend(parsed_limits)
 
-    def limit(self, limit: LimitType, *limits: LimitType) -> typing.Callable[[typing.Callable[P, R]], typing.Callable[P, R]]:
+    def limit(
+        self, limit: LimitType, *limits: LimitType
+    ) -> typing.Callable[[typing.Callable[P, R]], typing.Callable[P, R]]:
         parsed_limits = parse_limits((limit, *limits))
 
         def wrapper(func: typing.Callable[P, R]) -> typing.Callable[P, R]:
