@@ -16,7 +16,7 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         app: Starlette = request.app
-        limiter: Limiter | None = getattr(app.state, "limiter", None)  # type: ignore
+        limiter: Limiter | None = getattr(app.state, "limiter", None)
         if limiter is None or not limiter.enabled:
             return await call_next(request)
 
