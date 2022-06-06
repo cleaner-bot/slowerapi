@@ -12,7 +12,9 @@ async def test_email() -> None:
     assert cfiparr.aclient.headers["x-auth-email"] == "test@test.cf"
     assert cfiparr.aclient.headers["x-auth-key"] == "0123456789"
 
-    cfiparr.aclient.post = post = mock.AsyncMock(return_value=mock.Mock())  # type: ignore
+    cfiparr.aclient.post = post = mock.AsyncMock(  # type: ignore
+        return_value=mock.Mock()
+    )
 
     await cfiparr(None, "1.2.3.0/24")  # type: ignore
 
@@ -40,7 +42,9 @@ async def test_with_note() -> None:
     cfiparr = CloudflareIPAccessRuleReporter(
         "test@test.cf", "1234567890", "1234", "note"
     )
-    cfiparr.aclient.post = post = mock.AsyncMock(return_value=mock.Mock())  # type: ignore
+    cfiparr.aclient.post = post = mock.AsyncMock(  # type: ignore
+        return_value=mock.Mock()
+    )
 
     await cfiparr(None, "1.2.3.0/24")  # type: ignore
 
