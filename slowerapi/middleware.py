@@ -1,3 +1,4 @@
+import typing
 from datetime import datetime
 
 from starlette.applications import Starlette
@@ -9,6 +10,8 @@ from starlette.routing import Match
 from .limit import Limit
 from .limiter import Limiter
 from .strategy import Ratelimited
+
+HandlerFunc = typing.Callable[..., typing.Any]
 
 
 class RatelimitMiddleware(BaseHTTPMiddleware):
@@ -37,7 +40,7 @@ class RatelimitMiddleware(BaseHTTPMiddleware):
             if response:
                 return response
 
-        handler = None
+        handler: HandlerFunc | None = None
         for route in app.routes:
             match, _ = route.matches(request.scope)
             if match == Match.FULL and hasattr(route, "endpoint"):

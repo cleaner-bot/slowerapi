@@ -1,3 +1,5 @@
+import typing
+
 from fastapi import Request
 
 HEADERS = ("cf-connecting-ip",)
@@ -8,5 +10,6 @@ def get_visitor_ip(request: Request) -> str:
         if header in request.headers:
             return request.headers[header]
 
-    # this is a string
-    return request.client.host  # type: ignore
+    if request.client is None:
+        raise RuntimeError("missing request.client")
+    return request.client.host
